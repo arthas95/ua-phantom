@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Timezone Spoofer",
+  "version": "1.0",
+  "description": "Masque votre vrai fuseau horaire",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_scripts/content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_popup": "popup/popup.html"
+  }
+}
