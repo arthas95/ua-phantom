@@ -1,17 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src ="/src.js"></script>
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <title>UA Phantom</title>
+  <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-    <h1>Randomize user-agent and time</h1>
-    
 
+  <div class="popup-container">
 
-    
-    </body>
- 
+    <header class="header">
+      <div>
+        <h1>UA Phantom</h1>
+        <p>Identité navigateur active</p>
+      </div>
+
+      <div class="status-dot"></div>
+    </header>
+
+    <section class="card">
+      <div class="card-title">User-Agent actif</div>
+
+      <div id="userAgent" class="value-box">
+        Chargement...
+      </div>
+
+      <button id="copyUserAgent" class="button">
+        Copier le User-Agent
+      </button>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Fuseau horaire</div>
+
+      <div id="timezone" class="value-box small">
+        Chargement...
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">Heure locale</div>
+
+      <div id="localTime" class="value-box small">
+        Chargement...
+      </div>
+    </section>
+
+    <footer class="footer">
+      V1 - Extension expérimentale
+    </footer>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

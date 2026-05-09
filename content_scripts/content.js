@@ -1,49 +1,76 @@
 // Envoie un message depuis le content script vers le background script.
-
 browser.runtime.sendMessage({
-
-    // Le message envoyé contient un champ "type".
-    // Ici, on dit au background : "je veux récupérer le User-Agent choisi".
     type: "GET_USER_AGENT"
-
-// Quand le background répond, le résultat arrive dans "response".
 }).then((response) => {
 
-    // On récupère dans la réponse la propriété "userAgent".
-    // Cette valeur est ensuite stockée dans la variable fakeUserAgent.
+    // User-Agent récupéré depuis le background
     const fakeUserAgent = response.userAgent;
 
-    // Affiche dans la console le User-Agent récupéré depuis le background.
+    // Fuseau horaire simulé
+    const fakeTimeZone = "America/New_York";
+
+    // Offset simulé
+    // New York UTC-5 = 300
+    // Paris UTC+1 = -60
+    // Paris UTC+2 = -120
+    const fakeOffset = 300;
+
     console.log("User agent récupéré :", fakeUserAgent);
 
-    // On prépare le contenu JavaScript qui sera injecté dans la page.
-    // Ce script va modifier navigator.userAgent côté page.
+    // Création de la balise script
+    const script = document.createElement("script");
+
+    // Code injecté dans le vrai contexte de la page
     script.textContent = `
+(function() {
 
-  // Redéfinit la propriété navigator.userAgent.
-  // Object.defineProperty permet de modifier le comportement d’une propriété.
-  Object.defineProperty(navigator, "userAgent", {
+    const fakeUserAgent = ${JSON.stringify(fakeUserAgent)};
+    const fakeTimeZone = ${JSON.stringify(fakeTimeZone)};
+    const fakeOffset = ${JSON.stringify(fakeOffset)};
 
-    // Le getter est une fonction appelée quand la page lit navigator.userAgent.
-    get: function() {
+    // =========================
+    // SPOOF USER-AGENT
+    // =========================
 
-      // Retourne le faux User-Agent récupéré depuis le background.
-      return ${JSON.stringify(fakeUserAgent)};
-    },
+    Object.defineProperty(navigator, "userAgent", {
+        get: function() {
+            return fakeUserAgent;
+        },
+        configurable: true
+    });
 
-    // configurable: true signifie que cette propriété pourra être redéfinie plus tard.
-    configurable: true
-  });
+    // =========================
+    // SPOOF TIMEZONE
+    // =========================
 
-  // Affiche dans la console de la page le User-Agent après modification.
-  console.log("navigator.userAgent modifié :", navigator.userAgent);
+    const originalResolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions;
+
+    Intl.DateTimeFormat.prototype.resolvedOptions = function() {
+        const options = originalResolvedOptions.call(this);
+
+        return {
+            ...options,
+            timeZone: fakeTimeZone
+        };
+    };
+
+    Date.prototype.getTimezoneOffset = function() {
+        return fakeOffset;
+    };
+
+    console.log("[Extension] User-Agent simulé :", navigator.userAgent);
+    console.log("[Extension] Fuseau horaire simulé :", fakeTimeZone);
+    console.log("[Extension] Offset simulé :", new Date().getTimezoneOffset());
+
+})();
 `;
 
-    // Ajoute le script dans la page HTML.
-    // C’est ce qui permet d’exécuter le code dans le contexte de la page.
+    // Injection du script dans la page
     document.documentElement.appendChild(script);
 
-    // Supprime la balise script après exécution.
-    // Le code a déjà été exécuté, donc on nettoie le DOM.
+    // Nettoyage
     script.remove();
+
+}).catch((error) => {
+    console.error("Erreur récupération User-Agent :", error);
 });
